@@ -37,7 +37,7 @@ e.g:
 
             getpd 'n.' [-1] ITALIANDATA.txt ITALIANDATA2.txt
 
-2. Question: "*Which density of probability follow the symbols after **any possible symbol** in Italian?*"
+2. Question: "*Which density of probability follow the symbols after* **any possible symbol** *in Italian?*"
 
     A rule to answer this question is still quite simple: '..' [-1]
 
