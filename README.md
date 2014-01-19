@@ -7,6 +7,8 @@ The aim of getpd is to get the probability distribution (*GetProbabilityDistribu
 *N.B*: Getpd uses the version and the sintax provided from Python to handle **RegEX**. <br>
 For the best use of getpd you have to know the [Slice](http://en.wikipedia.org/wiki/Array_slicing#1991:_Python) Notation which Python uses to handle the intervals.
 
+**N.B**: Getpd actually is under design.
+
 Known of the *rule*
 ==================
 
@@ -112,4 +114,5 @@ However there are other situations where you can use this tool:
 
 1. Cryptanalysis (see: [Frequency Analysis](http://en.wikipedia.org/wiki/Frequency_analysis))
 2. Compute statistics inside uniform data
-3. Answer stupid question like the example above
+3. Test PRGN
+4444. Answer stupid question like the example above
