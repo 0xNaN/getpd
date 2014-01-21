@@ -1,7 +1,7 @@
 What is getpd
 ==============
 
-The aim of getpd is to get the probability distribution (*GetProbabilityDistribution*) of a **rule** inside a set of uniform datas.
+The aim of getpd is to get the probability distribution (*GetProbabilityDistribution*) of a **rule** inside a set of uniform data.
 
 
 *N.B*: Getpd uses the version and the sintax provided from Python to handle **RegEX**. <br>
@@ -16,7 +16,7 @@ The way in which getpd knows which patterns (or set of patterns) has to analyze 
 
 Basically a rule is composed by one **regular expression** and a **cut interval**.
 
-The goal of getpd is to understand this rule and to looking for all the datas that matches the regular expression and - for each tocket found - it removes the symbols inside the interval provided and computes the probability compared to the set of uniform datas passed to it.
+The goal of getpd is to understand this rule and to looking for all the data that matches the regular expression and - for each tocket found - it removes the symbols inside the interval provided and computes the probability compared to the set of uniform data passed to it.
 
 Getpd uses the interval to know which of the token parts has to consider as a possible *determination* and which is the pattern that have to search (the *Random Variable*).
 
