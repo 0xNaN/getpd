@@ -2,7 +2,8 @@ import argparse
 import sys
 import re
 
-rules = []
+rules_re = []
+rules_in = []
 inputs = []
 
 def main():
@@ -19,15 +20,30 @@ def check_input(args):
         match = re.match('^\[.*\]\[[0-9:+-]*\]', rule)
 
         if match:
-            rule =  re.split('^\[.*]\[', rule)
-            print(rule[0], rule[1])
-            # Check the regex specified and the interval
+            # separate regex from interval
+            rule = rule[1:-1]
+            rule =  rule.rsplit('][')
+
+            rule_regex = rule[0]
+            rule_interval = rule[1]
+
+            # compute the regex to know if it's valid
+            try:
+                re.compile(rule_regex)
+            except re.error as Error:
+                print(rule_regex + " Malformed: " + str(Error))
+                exit()
 
             # put in a table
+            global rules_re, rules_in
+            rules_re += rule_regex
+            rules_in += rule_interval
         else:
             print(rule, "<- Malformed")
             # malformed input
 
+    print(rules_re)
+    print(rules_in)
 
 
 # Parsing input options
