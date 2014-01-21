@@ -21,8 +21,7 @@ def check_input(args):
 
         if match:
             # separate regex from interval
-            rule = rule[1:-1]
-            rule =  rule.rsplit('][')
+            rule =  rule[1:-1].rsplit('][')
 
             rule_regex = rule[0]
             rule_interval = rule[1]
@@ -36,8 +35,8 @@ def check_input(args):
 
             # put in a table
             global rules_re, rules_in
-            rules_re += rule_regex
-            rules_in += rule_interval
+            rules_re.append(rule_regex)
+            rules_in.append(rule_interval)
         else:
             print(rule, "<- Malformed")
             # malformed input
