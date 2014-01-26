@@ -1,57 +1,66 @@
 import argparse
 import sys
 import re
+import logging
 
 rules_re = []
 rules_in = []
 inputs = []
 
+be_verbose = False
+
 def main():
 
     # Option parsing
     args = parsing_init()
-    check_input(args)
 
-# Check input
-def check_input(args):
-    for rule in args.rules:
+    init_rules(args.rules)
 
-        #check the rule with regex
-        match = re.match('^\[.*\]\[[0-9:+-]*\]', rule)
+def init_rules(rules):
 
-        if match:
-            # separate regex from interval
-            rule =  rule[1:-1].rsplit('][')
+    for rule in rules:
+        rule_match = re.match('^\[.*\]\[[0-9:+-]*\]', rule)
+
+        if rule_match:
+            # split Regex from Interval
+            rule = rule[1:-1].rsplit('][')
 
             rule_regex = rule[0]
             rule_interval = rule[1]
 
-            # compute the regex to know if it's valid
-            try:
-                re.compile(rule_regex)
-            except re.error as Error:
-                print(rule_regex + " Malformed: " + str(Error))
-                exit()
+            # check correctness of the Regex
+            if not is_correct_regex(rule_regex):
+                logging.warning('Invalid regex-> %s', rule_regex)
+            else:
+                global rules_re, rules_in
+                rules_re.append(rule_regex)
+                rules_in.append(rule_interval)
 
-            # put in a table
-            global rules_re, rules_in
-            rules_re.append(rule_regex)
-            rules_in.append(rule_interval)
-        else:
-            print(rule, "<- Malformed")
-            # malformed input
+                if(be_verbose)
+                    loggin.info("Rule loaded -> %s
+def is_correct_regex (regex):
 
-    print(rules_re)
-    print(rules_in)
+    correct = False
+    try:
+        re.compile(regex)
+        correct = True
+    except re.error as E:
+        correct = False
+
+    return correct
+
 
 
 # Parsing input options
 def parsing_init():
+
     parser = argparse.ArgumentParser('getpd')
     parser.add_argument('-r', '--rules', nargs='+', required=True,
             help='Rules to perform the analysis')
     parser.add_argument('-i', '--input', nargs='+', required=True,
             help='Input data')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Be verbose')
+
     return parser.parse_args()
 
 if __name__ == '__main__':
