@@ -28,27 +28,51 @@ class Rule:
         return rule[0]
 
     def _sliceFromRule(self, strrule):
-        """ Build a slice object from a Rule """
+        """ Build a slice object from a Rule
+            NOTE: In according to slice class, if a slice
+            is build only with a value it is the 'stop' value.
+        """
 
-        start = None
-        stop = None
-        step = None
+        start = stop = step = None
 
-        # split Interval from Rule, obataining: x:x:x
+        # split Slice from Rule, obataining: x:x:x
         slicedata = strrule[1:-1].rsplit('][')
         slicedata = slicedata[1]
 
         # find start, stop and step
         slicedata = slicedata.split(':')
+        numtoken = len(slicedata)
 
-        #
-        try:
+        if numtoken > 3:
+            raise ValueError('Malformed Slice: too args')
+
+        # Converting in Int, '' must be consider 0
+        for i in range(0, numtoken):
+            try:
+                slicedata[i] = int(slicedata[i])
+            except:
+                if slicedata[i] == '':
+                    slicedata[i] = 0
+                else:
+                    raise ValueError('Malformed Slice: unallowed char')
+
+        if numtoken == 1:
+            # if only an arg given, it is 'stop'
+            # with or without colon symbol
+            stop = slicedata[0]
+
+        elif numtoken == 2:
+            start = slicedata[0]
+            stop = slicedata[1]
+
+        elif numtoken == 3:
             start = slicedata[0]
             stop = slicedata[1]
             step = slicedata[2]
-        except:
-            if start == None and stop == None:
-                raise 'Malformed Interval'
+
+            # N.B: step shouldn't be 0! if omitted is 1 or None
+            if step == 0: step = 1
+
         return slice(start, stop, step)
 
 
