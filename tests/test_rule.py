@@ -91,6 +91,17 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(0, rule._slice.stop)
         self.assertEqual(1, rule._slice.step)
 
+    def testSliceSuchAsIndex(self):
+        rule = Rule("[][1]")
+        self.assertEqual(1, rule._slice.start)
+        self.assertEqual(2, rule._slice.stop)
+        self.assertEqual(1, rule._slice.step)
+
+        rule = Rule("[][-1]")
+        self.assertEqual(-1, rule._slice.start)
+        self.assertEqual(-2, rule._slice.stop)
+        self.assertEqual(-1, rule._slice.step)
+
 def main():
 
     # Make the test suite & load all tests
