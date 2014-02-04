@@ -33,29 +33,23 @@ class Rule:
         slice_data = rule[1:-1].rsplit('][')
         slice_data = slice_data[1]
 
-        # split slice_data to find start, stop and step
+        # Make a list of int indexes
         slice_data = slice_data.split(':')
-
-        # convert slice_data to int
         slice_data = self._stringIndexToInt(slice_data)
 
-        # assign index to right var
+        # assign indexes to right var
         ntoken = len(slice_data)
-
         if ntoken == 1:
-            # if only an arg given, it is 'stop'
-            # with, or without, colon symbol
             stop = slice_data[0]
         elif ntoken == 2:
             # start and stop, [:]
             start = slice_data[0]
             stop = slice_data[1]
         elif ntoken == 3:
-            # start, stop and step [::]
             start = slice_data[0]
             stop = slice_data[1]
             step = slice_data[2]
-            # step must != 0
+            # step shuldn't equal to 0
             if step == 0: step = 1
         elif ntoken > 3:
             raise ValueError('Malformed Slice: too args')
