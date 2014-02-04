@@ -8,15 +8,17 @@ class Rule:
     _slice = None
 
     def __init__(self, strrule):
+        """ Build Rule Object """
 
         if not self._checkPattern(strrule):
-            raise 'Malformed Rule'
+            raise ValueError('Malformed Rule')
 
         self._regex = self._regexFromRule(strrule)
         self._slice = self._sliceFromRule(strrule)
 
-        if not self._isCorrectRegex(self._regex):
-            raise 'Malformed RegEX'
+        if not self._isRegexCorrect(self._regex):
+            raise ValueError('Malformed RegEX')
+
 
     def _regexFromRule(self, strrule):
         """ Get the RegEX inside a rule """
