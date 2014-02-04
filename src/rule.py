@@ -80,22 +80,18 @@ class Rule:
     def _checkPattern (self, strrule):
         """ Check if a Rule has a correct form """
 
-        match = re.match('^\[.*\]\[[0-9:+-]*\]', strrule)
+        match = re.match('^\[.*\]\[[0-9:+-]*\]$', strrule)
 
         if match:
             return True
         return False
 
-    def _isCorrectRegex(self, regex):
-        """ Compile a RegEX to check if it is correct """
-        correct = False
+    def _isRegexCorrect (self, regex):
+        correct = True
 
         try:
             re.compile(regex)
-            correct = True
-        except re.error as E:
+        except:
             correct = False
 
         return correct
-
-
