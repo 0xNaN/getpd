@@ -11,25 +11,85 @@ class RuleTests(unittest.TestCase):
 
     def testGiveCompleteCorrectRule(self):
         rule = Rule("[..][1:2:3]")
-
         self.assertEqual("..", rule._regex)
 
         self.assertEqual(slice, type(rule._slice))
-        self.assertEqual('1', rule._slice.start)
-        self.assertEqual('2', rule._slice.stop)
-        self.assertEqual('3', rule._slice.step)
+        self.assertEqual(1, rule._slice.start)
+        self.assertEqual(2, rule._slice.stop)
+        self.assertEqual(3, rule._slice.step)
 
-    def testGiveCorrectRuleWithoutStep(self):
-        rule = Rule("[..][1:2]")
+    def testMalformedRule(self):
+        # Incorrect form
+        self.assertRaises(ValueError, Rule, "[]")
+        self.assertRaises(ValueError, Rule, "[][")
+        self.assertRaises(ValueError, Rule, "xxx")
 
-        self.assertEqual("..", rule._regex)
+        # Not allowed char in Slice
+        self.assertRaises(ValueError, Rule, "[xx][x]")
+        self.assertRaises(ValueError, Rule, "[xx][/1]")
 
-        self.assertEqual(slice, type(rule._slice))
-        self.assertEqual('1', rule._slice.start)
-        self.assertEqual('2', rule._slice.stop)
+    def testMalformedRegEx(self):
+        self.assertRaises(ValueError,  Rule, "[((][1]")
+        self.assertRaises(ValueError, Rule, "/")
 
-    def testWithSomeFormOfCorrectSlice(self):
+    def testMalformedSlice(self):
+        self.assertRaises(ValueError, Rule, "[.][a]")
+        self.assertRaises(ValueError, Rule, "[.][+-1:]")
+        self.assertRaises(ValueError, Rule, "[.][a1:b1:c1]")
+        self.assertRaises(ValueError, Rule, "[.][+-1]")
+
+    def testSliceOnlyWithStart(self):
         rule = Rule("[][1:]")
+        self.assertEqual(1, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
+
+
+        rule = Rule("[][-1::]")
+        self.assertEqual(-1, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(1, rule._slice.step)
+
+        rule = Rule("[][:]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
+
+
+    def testSliceOnlyWithStop(self):
+        rule = Rule("[][-1]")
+        self.assertEqual(None, rule._slice.start)
+        self.assertEqual(-1, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
+
+        rule = Rule("[][:+1]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(1, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
+
+
+        rule = Rule("[][:-1:]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(-1, rule._slice.stop)
+        self.assertEqual(1, rule._slice.step)
+
+
+    def testSliceOnlyWithStep(self):
+        rule = Rule("[][::-1]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(-1, rule._slice.step)
+
+
+        rule = Rule("[][::]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(1, rule._slice.step)
+
+        rule = Rule("[][::+1]")
+        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(1, rule._slice.step)
 
 def main():
 
