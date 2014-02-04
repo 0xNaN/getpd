@@ -40,7 +40,14 @@ class Rule:
         # assign indexes to right var
         ntoken = len(slice_data)
         if ntoken == 1:
-            stop = slice_data[0]
+            # When there is only an arg it describe a single
+            # index. Such as [1], [-1].
+            start = slice_data[0]
+            if start >= 0:
+                step = 1
+            else:
+                step = -1
+            stop = start + step
         elif ntoken == 2:
             # start and stop, [:]
             start = slice_data[0]
