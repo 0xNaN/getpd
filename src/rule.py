@@ -83,15 +83,21 @@ class Rule:
     def _stringIndexToInt(self, indexes):
         """ Cast a list of string index to a list of int index.
 
-            N.B: If an index is equal to '' it is considered 0.
+            N.B: If an index is equal to '' it is considered None.
         """
-        for i in range(0, len(indexes)):
+        for i in range(len(indexes)):
             try:
                 if indexes[i] == '':
-                    indexes[i] = 0
+                    indexes[i] = None
                 else:
                     indexes[i] = int(indexes[i])
             except:
                 raise ValueError('Malformed Slice: check value')
         return indexes
+
+    def sliceUp(self, data):
+        """ Apply the Slice object inside the Rule """
+        data = data.__getitem__(self._slice)
+        return data
+
 

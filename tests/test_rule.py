@@ -97,6 +97,24 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(-2, rule._slice.stop)
         self.assertEqual(-1, rule._slice.step)
 
+    def testSliceObject(self):
+        s = "lorem"
+
+        rule = Rule("[][-1]")
+        self.assertEqual(s[-1], rule.sliceUp(s))
+
+        rule = Rule("[][+3]")
+        self.assertEqual(s[3], rule.sliceUp(s))
+
+        rule = Rule("[][:-1]")
+        self.assertEqual(s[:-1], rule.sliceUp(s))
+
+        rule = Rule("[][3:5:-1]")
+        self.assertEqual(s[3:5:-1], rule.sliceUp(s))
+
+        rule = Rule("[][:-4:-1]")
+        self.assertEqual(s[:-4:-1], rule.sliceUp(s))
+
 def main():
 
     # Make the test suite & load all tests
