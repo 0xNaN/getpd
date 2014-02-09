@@ -100,4 +100,27 @@ class Rule:
         data = data.__getitem__(self._slice)
         return data
 
+    def reverseSliceUp(self, data):
+        """ Apply the complementary of the Slice inside the Rule """
+        # Get the right indices inside data.
+        # XXX: indices(int) apply the modulo operator to each index with
+        # the length of the data
+        length = len(data)
+        start, stop, step = self._slice.indices(length)
+
+        if(step < 0):
+            start, stop = stop, start
+            data = data[::-1]
+
+        if(start > stop):
+            raise ValueError("Malformed Slice: start can'tbe bigger than stop")
+
+        reverse = ''
+        for i in range(0, length, abs(step)):
+            if(i >= start and i < stop):
+                reverse += '.'
+            else:
+                reverse += data[i]
+        return reverse
+
 
