@@ -115,6 +115,18 @@ class RuleTests(unittest.TestCase):
         rule = Rule("[][:-4:-1]")
         self.assertEqual(s[:-4:-1], rule.sliceUp(s))
 
+    def testReverseSliceUp(self):
+        s = "lorem"
+
+        rule = Rule("[][1:4]")
+        self.assertEqual("l...m", rule.reverseSliceUp(s))
+
+        rule = Rule("[][-2:-4:-1]")
+        self.assertEqual("m..ol", rule.reverseSliceUp(s))
+
+        rule = Rule("[][1:4:2]")
+        self.assertEqual("l.m", rule.reverseSliceUp(s))
+
 def main():
 
     # Make the test suite & load all tests
