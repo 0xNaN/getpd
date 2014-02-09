@@ -41,49 +41,49 @@ class RuleTests(unittest.TestCase):
     def testSliceOnlyWithStart(self):
         rule = Rule("[][1:]")
         self.assertEqual(1, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
         rule = Rule("[][-1::]")
         self.assertEqual(-1, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
-        self.assertEqual(1, rule._slice.step)
+        self.assertEqual(None, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
 
         rule = Rule("[][:]")
-        self.assertEqual(0, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.start)
+        self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
     def testSliceOnlyWithStop(self):
         rule = Rule("[][:+1]")
-        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(None, rule._slice.start)
         self.assertEqual(1, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
         rule = Rule("[][:-1:]")
-        self.assertEqual(0, rule._slice.start)
+        self.assertEqual(None, rule._slice.start)
         self.assertEqual(-1, rule._slice.stop)
-        self.assertEqual(1, rule._slice.step)
+        self.assertEqual(None, rule._slice.step)
 
 
     def testSliceOnlyWithStep(self):
         rule = Rule("[][::-1]")
-        self.assertEqual(0, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.start)
+        self.assertEqual(None, rule._slice.stop)
         self.assertEqual(-1, rule._slice.step)
 
 
         rule = Rule("[][::]")
-        self.assertEqual(0, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
-        self.assertEqual(1, rule._slice.step)
+        self.assertEqual(None, rule._slice.start)
+        self.assertEqual(None, rule._slice.stop)
+        self.assertEqual(None, rule._slice.step)
 
         rule = Rule("[][::+1]")
-        self.assertEqual(0, rule._slice.start)
-        self.assertEqual(0, rule._slice.stop)
+        self.assertEqual(None, rule._slice.start)
+        self.assertEqual(None, rule._slice.stop)
         self.assertEqual(1, rule._slice.step)
 
     def testSliceSuchAsIndex(self):
