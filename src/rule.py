@@ -2,20 +2,25 @@ import re
 
 class Rule:
     """ A class to handle Rule as pair of RegEX and Slice object. """
-    _regex = ""
+    _regex = None
     _slice = None
+
+    # A copy of the regex pattern
+    re_pattern = ""
 
     def __init__(self, rule):
         if not self._checkPattern(rule):
             raise ValueError('Malformed Rule')
 
-        self._regex = self._regexFromRule(rule)
-        self._slice = self._sliceFromRule(rule)
+        self.re_pattern = self._patternFromRule(rule)
 
-        if not self._isRegexCorrect(self._regex):
+        self._slice = self._sliceFromRule(rule)
+        self._regex = self._regexFromPattern(self.re_pattern)
+
+        if not self._regex:
             raise ValueError('Malformed RegEX')
 
-    def _regexFromRule(self, rule):
+    def _patternFromRule(self, rule):
         """ Get the RegEX inside a rule. """
         rule = rule[1:-1].rsplit('][')
         return rule[0]
@@ -71,14 +76,17 @@ class Rule:
             return True
         return False
 
-    def _isRegexCorrect(self, regex):
-        """ Check if a regex is compilable. """
-        correct = True
+    def _regexFromPattern(self, regex):
+        """ If the regex is compilable return an RegEX object.
+            Otherwise Null
+        """
+        regex_obj = None
         try:
-            re.compile(regex)
+            regex_obj = re.compile(regex)
         except:
-            correct = False
-        return correct
+            regex_obj = None
+
+        return regex_obj
 
     def _stringIndexToInt(self, indexes):
         """ Cast a list of string index to a list of int index.
