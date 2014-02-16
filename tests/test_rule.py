@@ -1,5 +1,6 @@
-import sys, unittest
-
+import sys
+import unittest
+import re
 
 sys.path.insert(0, '../src')
 
@@ -7,13 +8,14 @@ from rule import Rule
 
 class RuleTests(unittest.TestCase):
 
-    #def setUp(self):
-
     def testGiveCompleteCorrectRule(self):
         rule = Rule("[..][1:2:3]")
-        self.assertEqual("..", rule._regex)
 
-        self.assertEqual(slice, type(rule._slice))
+        self.assertEqual("..", rule.re_pattern)
+        # XXX: a better way to know the type ??
+        self.assertIsInstance(rule._regex, type(re.compile('')))
+
+        self.assertIsInstance(rule._slice, slice)
         self.assertEqual(1, rule._slice.start)
         self.assertEqual(2, rule._slice.stop)
         self.assertEqual(3, rule._slice.step)
