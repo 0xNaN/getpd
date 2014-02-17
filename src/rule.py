@@ -5,7 +5,7 @@ class Rule:
     _regex = None
     _slice = None
 
-    # A copy of the regex pattern
+    # A string copy of the regex
     re_pattern = ""
 
     def __init__(self, rule):
@@ -111,7 +111,8 @@ class Rule:
     def reverseSliceUp(self, data):
         """ Apply the complementary of the Slice inside the Rule """
         # Get the right indices inside data.
-        # XXX: indices(int) apply the modulo operator to each index with
+        # FUTURE NOTE: indices(int) apply the modulo operator to each index with
+
         # the length of the data
         length = len(data)
         start, stop, step = self._slice.indices(length)
@@ -130,5 +131,3 @@ class Rule:
             else:
                 reverse += data[i]
         return reverse
-
-
