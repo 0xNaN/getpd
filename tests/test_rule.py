@@ -133,11 +133,11 @@ def main():
 
     # Make the test suite & load all tests
     suite = unittest.TestSuite()
-
     loader = unittest.TestLoader()
-    rangeTests = loader.loadTestsFromTestCase(RuleTests)
 
-    suite.addTests(rangeTests)
+    ruleTests = loader.loadTestsFromTestCase(RuleTests)
+
+    suite.addTests(ruleTests)
 
     # Run tests
     unittest.TextTestRunner(verbosity=2).run(suite)
