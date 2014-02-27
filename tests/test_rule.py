@@ -40,6 +40,7 @@ class RuleTests(unittest.TestCase):
         self.assertRaises(ValueError, Rule, "[.][+-1:]")
         self.assertRaises(ValueError, Rule, "[.][a1:b1:c1]")
         self.assertRaises(ValueError, Rule, "[.][+-1]")
+        self.assertRaises(ValueError, Rule, "[.][1:2:-1]")
 
     def testSliceOnlyWithStart(self):
         rule = Rule("[][1:]")
@@ -73,11 +74,8 @@ class RuleTests(unittest.TestCase):
 
 
     def testSliceOnlyWithStep(self):
-        rule = Rule("[][::-1]")
-        self.assertEqual(None, rule._slice.start)
-        self.assertEqual(None, rule._slice.stop)
-        self.assertEqual(-1, rule._slice.step)
-
+        # Negative step doesn't supported
+        # useless for statistical purposes
 
         rule = Rule("[][::]")
         self.assertEqual(None, rule._slice.start)
@@ -90,6 +88,11 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(1, rule._slice.step)
 
     def testSliceSuchAsIndex(self):
+        # An index can be described through a
+        # Slice Object".
+        # For negative index is necessary a
+        #  negative steps
+
         rule = Rule("[][1]")
         self.assertEqual(1, rule._slice.start)
         self.assertEqual(2, rule._slice.stop)
