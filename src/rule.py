@@ -137,3 +137,34 @@ class Rule:
             else:
                 reverse += data[i]
         return reverse
+
+    def searchRnd(self, name):
+        for rndvar in self.rndvars:
+            if(rndvar.name == name):
+                return rndvar
+        return None
+
+    def put(self, data):
+        self.buff += data
+
+        matches = self._regex.finditer(self.buff, overlapped=True)
+
+        match = None
+        for match in matches:
+            rnd = self.reverseSliceUp(match.group(0))
+            det = self.sliceUp(match.group(0))
+
+            # search rnd in rndvars
+            rnd_ref = self.searchRnd(rnd)
+            if(rnd_ref == None):
+                # Create a new rndvar and add the
+                # determination
+                rnd = RandVar(rnd)
+                rnd.insertValue(det)
+
+                self.rndvars.insert(0, rnd)
+            else:
+                rnd_ref.insertValue(det)
+
+        if match is not None:
+            self.buff = self.buff[match.end(0) - 1:]
