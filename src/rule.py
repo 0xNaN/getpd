@@ -68,9 +68,12 @@ class Rule:
             start = slice_data[0]
             stop = slice_data[1]
             step = slice_data[2]
-            # step shuldn't equal to 0
+
             if step == 0: step = 1
-        elif ntoken > 3:
+            if(step != None and step < 0):
+                raise ValueError("Malformed Slice: negative step doesn't supported")
+
+        elif ntoken > 2:
             raise ValueError('Malformed Slice: too args')
 
         return slice(start, stop, step)
@@ -117,19 +120,15 @@ class Rule:
 
     def reverseSliceUp(self, data):
         """ Apply the complementary of the Slice inside the Rule """
-        # Get the right indices inside data.
-        # FUTURE NOTE: indices(int) apply the modulo operator to each index with
+        # FUTURE NOTE: indices(int) apply the modulo operator
+        # to each index (excluse step) with the length of the data
 
-        # the length of the data
+        # Get the right indices inside data.
         length = len(data)
         start, stop, step = self._slice.indices(length)
 
         if(step < 0):
-            start, stop = stop, start
-            data = data[::-1]
-
-        if(start > stop):
-            raise ValueError("Malformed Slice: start can'tbe bigger than stop")
+            start, stop = stop + 1, start + 1
 
         reverse = ''
         for i in range(0, length, abs(step)):
