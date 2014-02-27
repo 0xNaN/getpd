@@ -1,12 +1,18 @@
-import re
+import regex as re
+
+from randvar import RandVar
 
 class Rule:
     """ A class to handle Rule as pair of RegEX and Slice object. """
+    rndvars = None
+
     _regex = None
     _slice = None
 
     # A string copy of the regex
     re_pattern = ""
+
+    buff = ""
 
     def __init__(self, rule):
         if not self._checkPattern(rule):
@@ -19,6 +25,7 @@ class Rule:
 
         if not self._regex:
             raise ValueError('Malformed RegEX')
+        self.rndvars = []
 
     def _patternFromRule(self, rule):
         """ Get the RegEX inside a rule. """
