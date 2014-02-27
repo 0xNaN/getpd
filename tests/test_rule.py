@@ -1,10 +1,11 @@
 import sys
 import unittest
-import re
+import regex as re
 
 sys.path.insert(0, '../src')
 
 from rule import Rule
+from randvar import RandVar
 
 class RuleTests(unittest.TestCase):
 
