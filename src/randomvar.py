@@ -61,7 +61,11 @@ class RandomVar:
 
     def dmf(self, accurancy=16, verbosity=False):
         """Generate the Distribution Mass Function (DMF).
-
+        Arguments:
+            accurancy -- an integer to specify the digit of the
+                         frequencies
+            verbosity -- a boolean if true each frequence has
+                         the symbol to which it refers
         Return:
         A list where the i-th element contains the
         probability to obtaining the i-th sample in
@@ -75,7 +79,7 @@ class RandomVar:
 
             elem = p
             if verbosity:
-                elem = str(samples[i]) + ":" + str(p)
+                elem = str(self.samples[i]) + ":" + str(p)
             dmf.insert(i, elem)
         return dmf
 
