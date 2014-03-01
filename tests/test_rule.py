@@ -1,20 +1,19 @@
 import sys
 import unittest
-import regex as re
+import regex
 
 sys.path.insert(0, '../src')
 
 from rule import Rule
-from randvar import RandVar
+from randomvar import RandomVar
 
 class RuleTests(unittest.TestCase):
 
     def testGiveCompleteCorrectRule(self):
-        rule = Rule("[..][1:2:3]")
+        rule = Rule("..", "1:2:3")
 
-        self.assertEqual("..", rule.re_pattern)
-        # XXX: a better way to know the type ??
-        self.assertIsInstance(rule._regex, type(re.compile('')))
+        self.assertIsInstance(rule._regex, type(regex.compile('')))
+        self.assertEqual("..", rule._regex.pattern)
 
         self.assertIsInstance(rule._slice, slice)
         self.assertEqual(1, rule._slice.start)
@@ -23,51 +22,49 @@ class RuleTests(unittest.TestCase):
 
     def testMalformedRule(self):
         # Incorrect form
-        self.assertRaises(ValueError, Rule, "[]")
-        self.assertRaises(ValueError, Rule, "[][")
-        self.assertRaises(ValueError, Rule, "xxx")
+        self.assertRaises(ValueError, Rule, None, None)
+        self.assertRaises(ValueError, Rule, "", None)
+        self.assertRaises(ValueError, Rule, None, "")
 
         # Not allowed char in Slice
-        self.assertRaises(ValueError, Rule, "[xx][x]")
-        self.assertRaises(ValueError, Rule, "[xx][/1]")
+        self.assertRaises(ValueError, Rule, ".", "a")
+        self.assertRaises(ValueError, Rule, ".", "/1")
 
     def testMalformedRegEx(self):
-        self.assertRaises(ValueError,  Rule, "[((][1]")
-        self.assertRaises(ValueError, Rule, "/")
+        self.assertRaises(ValueError,  Rule, "((", "1")
 
     def testMalformedSlice(self):
-        self.assertRaises(ValueError, Rule, "[.][a]")
-        self.assertRaises(ValueError, Rule, "[.][+-1:]")
-        self.assertRaises(ValueError, Rule, "[.][a1:b1:c1]")
-        self.assertRaises(ValueError, Rule, "[.][+-1]")
-        self.assertRaises(ValueError, Rule, "[.][1:2:-1]")
+        self.assertRaises(ValueError, Rule, ".","a")
+        self.assertRaises(ValueError, Rule, ".","+-1:")
+        self.assertRaises(ValueError, Rule, ".","a1:b1:c1")
+        self.assertRaises(ValueError, Rule, ".","1:2:-1")
 
     def testSliceOnlyWithStart(self):
-        rule = Rule("[][1:]")
+        rule = Rule("", "1:")
         self.assertEqual(1, rule._slice.start)
         self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
-        rule = Rule("[][-1::]")
+        rule = Rule("", "-1::")
         self.assertEqual(-1, rule._slice.start)
         self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
-        rule = Rule("[][:]")
+        rule = Rule("", ":")
         self.assertEqual(None, rule._slice.start)
         self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
     def testSliceOnlyWithStop(self):
-        rule = Rule("[][:+1]")
+        rule = Rule("", ":+1")
         self.assertEqual(None, rule._slice.start)
         self.assertEqual(1, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
 
-        rule = Rule("[][:-1:]")
+        rule = Rule("", ":-1:")
         self.assertEqual(None, rule._slice.start)
         self.assertEqual(-1, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
@@ -77,12 +74,12 @@ class RuleTests(unittest.TestCase):
         # Negative step doesn't supported
         # useless for statistical purposes
 
-        rule = Rule("[][::]")
+        rule = Rule("", "::")
         self.assertEqual(None, rule._slice.start)
         self.assertEqual(None, rule._slice.stop)
         self.assertEqual(None, rule._slice.step)
 
-        rule = Rule("[][::+1]")
+        rule = Rule("", "::+1")
         self.assertEqual(None, rule._slice.start)
         self.assertEqual(None, rule._slice.stop)
         self.assertEqual(1, rule._slice.step)
@@ -93,75 +90,75 @@ class RuleTests(unittest.TestCase):
         # For negative index is necessary a
         #  negative steps
 
-        rule = Rule("[][1]")
+        rule = Rule("", "1")
         self.assertEqual(1, rule._slice.start)
         self.assertEqual(2, rule._slice.stop)
         self.assertEqual(1, rule._slice.step)
 
-        rule = Rule("[][-1]")
+        rule = Rule("", "-1")
         self.assertEqual(-1, rule._slice.start)
         self.assertEqual(-2, rule._slice.stop)
         self.assertEqual(-1, rule._slice.step)
 
-    def testSliceObject(self):
+    def testSlice(self):
         s = "lorem"
 
-        rule = Rule("[][-1]")
-        self.assertEqual(s[-1], rule.sliceUp(s))
+        rule = Rule("", "-1")
+        self.assertEqual(s[-1], rule._apply_slice(s))
 
-        rule = Rule("[][+3]")
-        self.assertEqual(s[3], rule.sliceUp(s))
+        rule = Rule("", "+3")
+        self.assertEqual(s[3], rule._apply_slice(s))
 
-        rule = Rule("[][:-1]")
-        self.assertEqual(s[:-1], rule.sliceUp(s))
+        rule = Rule("", ":-1")
+        self.assertEqual(s[:-1], rule._apply_slice(s))
 
-        rule = Rule("[][3:5:2]")
-        self.assertEqual(s[3:5:2], rule.sliceUp(s))
+        rule = Rule("", "3:5:2")
+        self.assertEqual(s[3:5:2], rule._apply_slice(s))
 
-        rule = Rule("[][:-4:1]")
-        self.assertEqual(s[:-4:1], rule.sliceUp(s))
+        rule = Rule("", ":-4:1")
+        self.assertEqual(s[:-4:1], rule._apply_slice(s))
 
-    def testReverseSliceUp(self):
+    def testFillSlice(self):
         s = "lorem"
 
-        rule = Rule("[][-1]")
-        self.assertEqual("lore.", rule.reverseSliceUp(s))
+        rule = Rule("", "-1")
+        self.assertEqual("lore.", rule._fill_slice(s))
 
-        rule = Rule("[][-3]")
-        self.assertEqual("lo.em", rule.reverseSliceUp(s))
+        rule = Rule("", "-3")
+        self.assertEqual("lo.em", rule._fill_slice(s))
 
-        rule = Rule("[][1:4]")
-        self.assertEqual("l...m", rule.reverseSliceUp(s))
+        rule = Rule("", "1:4")
+        self.assertEqual("l...m", rule._fill_slice(s))
 
-        rule = Rule("[][1:4:2]")
-        self.assertEqual("l.m", rule.reverseSliceUp(s))
+        rule = Rule("", "1:4:2")
+        self.assertEqual("l.m", rule._fill_slice(s))
 
-    def testSearchRnd(self):
-        rule = Rule("[(ab).][-1]")
+    def testSearchRndvar(self):
+        rule = Rule("(ab).","-1")
 
-        self.assertEqual(None, rule.searchRnd(''))
+        self.assertEqual(None, rule.search_rndvar(''))
 
         # Manual populations of the rndvars array
         # of the aspecting result with this data:
         # "a1b1a2"
-        rule.rndvars.insert(0, RandVar('a.'))
-        rule.rndvars[0].insertValue(1)
-        rule.rndvars[0].insertValue(2)
+        rule.rndvars.insert(0, RandomVar('a.'))
+        rule.rndvars[0].add(1)
+        rule.rndvars[0].add(2)
 
-        rule.rndvars.insert(0, RandVar('b.'))
-        rule.rndvars[0].insertValue(1)
+        rule.rndvars.insert(0, RandomVar('b.'))
+        rule.rndvars[0].add(1)
 
-        rndvar = rule.searchRnd('a.')
+        rndvar = rule.search_rndvar('a.')
         self.assertEqual('a.', rndvar.name)
-        self.assertEqual(2, rndvar.total_weight)
+        self.assertEqual(2, rndvar._tot_weight)
 
-        rndvar = rule.searchRnd('b.')
+        rndvar = rule.search_rndvar('b.')
         self.assertEqual('b.', rndvar.name)
-        self.assertEqual(1, rndvar.total_weight)
+        self.assertEqual(1, rndvar._tot_weight)
 
 
     def testPutWithOneRndVar(self):
-        rule = Rule("[t.][-1]")
+        rule = Rule("t.", "-1")
 
         s = "this text contains 5 't.'"
 
@@ -177,19 +174,19 @@ class RuleTests(unittest.TestCase):
         self.assertEqual('t.', rule.rndvars[0].name)
 
         rndvar = rule.rndvars[0]
-        self.assertEqual(5, len(rndvar.samples_space))
+        self.assertEqual(5, len(rndvar.samples))
 
-        for w in rndvar.samples_weight:
+        for w in rndvar.weights:
             self.assertEqual(1, w)
 
         # The frequences are 1/5
-        rndvar.updateDmf()
+        dmf = rndvar.dmf()
 
-        for p in rndvar.dmf:
+        for p in dmf:
             self.assertEqual(1/5, p)
 
     def testPutWithPlusRndVar(self):
-        rule = Rule("[..][-1]")
+        rule = Rule("..","-1")
 
         s = "aabbccddeeff"
 
@@ -202,30 +199,30 @@ class RuleTests(unittest.TestCase):
         # frequencies check
         rndvars = rule.rndvars
         for rnd in rndvars:
-            rnd.updateDmf()
+            rnd.dmf()
 
         self.assertEqual('f.', rndvars[0].name)
-        self.assertEqual(1, rndvars[0].dmf[0]) #ff
+        self.assertEqual(1, rndvars[0]._dmf[0]) #ff
 
         self.assertEqual('e.', rndvars[1].name)
-        self.assertEqual(1/2, rndvars[1].dmf[0]) #ee
-        self.assertEqual(1/2, rndvars[1].dmf[1]) #ef
+        self.assertEqual(1/2, rndvars[1]._dmf[0]) #ee
+        self.assertEqual(1/2, rndvars[1]._dmf[1]) #ef
 
         self.assertEqual('d.', rndvars[2].name)
-        self.assertEqual(1/2, rndvars[2].dmf[0]) #dd
-        self.assertEqual(1/2, rndvars[2].dmf[1]) #de
+        self.assertEqual(1/2, rndvars[2]._dmf[0]) #dd
+        self.assertEqual(1/2, rndvars[2]._dmf[1]) #de
 
         self.assertEqual('c.', rndvars[3].name)
-        self.assertEqual(1/2, rndvars[3].dmf[0]) #cc
-        self.assertEqual(1/2, rndvars[3].dmf[1]) #cd
+        self.assertEqual(1/2, rndvars[3]._dmf[0]) #cc
+        self.assertEqual(1/2, rndvars[3]._dmf[1]) #cd
 
         self.assertEqual('b.', rndvars[4].name)
-        self.assertEqual(1/2, rndvars[4].dmf[0]) #bb
-        self.assertEqual(1/2, rndvars[4].dmf[1]) #bc
+        self.assertEqual(1/2, rndvars[4]._dmf[0]) #bb
+        self.assertEqual(1/2, rndvars[4]._dmf[1]) #bc
 
         self.assertEqual('a.', rndvars[5].name)
-        self.assertEqual(1/2, rndvars[5].dmf[0]) #aa
-        self.assertEqual(1/2, rndvars[5].dmf[1]) #ab
+        self.assertEqual(1/2, rndvars[5]._dmf[0]) #aa
+        self.assertEqual(1/2, rndvars[5]._dmf[1]) #ab
 
 def main():
 
