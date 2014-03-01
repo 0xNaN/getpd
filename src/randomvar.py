@@ -59,7 +59,7 @@ class RandomVar:
                 return self.samples[i]
             lower = upper + 1
 
-    def dmf(self, accurancy=16):
+    def dmf(self, accurancy=16, verbosity=False):
         """Generate the Distribution Mass Function (DMF).
 
         Return:
@@ -68,10 +68,16 @@ class RandomVar:
         the Samples list.
         """
         n_samples = len(self.samples)
+        dmf = []
         for i in range(n_samples):
             p = self.weights[i]/self._tot_weight
             self._dmf[i] = round(p, accurancy)
-        return self._dmf
+
+            elem = p
+            if verbosity:
+                elem = str(samples[i]) + ":" + str(p)
+            dmf.insert(i, elem)
+        return dmf
 
     def __int__(self):
         return int(self.value())
