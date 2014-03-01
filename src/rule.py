@@ -67,6 +67,23 @@ class Rule:
             start = match.end(0) - 1
             self.buff = self.buff[start:]
 
+    def result(self, accurancy=16, verbosity=True):
+        """Get a string that contains the result of the analisys.
+
+        Arguments:
+            accurancy -- an integer to specify the digit of the
+                         frequencies
+            verbosity -- a boolean if true each frequnce has the
+                         symbol to which it refers
+        Return:
+            A string contains the formatted result
+        """
+        res = ""
+        for rnd in self.rndvars:
+            dmf = rnd.dmf(accurancy, verbosity)
+            res += rnd.name + ":\t" + str(dmf) + "\n"
+        return res
+
     def _slice_from_str(self, sl):
         """Build a slice object from a string.
 
