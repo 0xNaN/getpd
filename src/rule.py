@@ -1,170 +1,186 @@
-import regex as re
+import regex
 
-from randvar import RandVar
+from randomvar import RandomVar
 
 class Rule:
-    """ A class to handle Rule as pair of RegEX and Slice object. """
+    """A class to perform On-Line statistical analisys through
+    a RegEX and a Slice Object.
+    """
+
     rndvars = None
+    buff = ""
 
     _regex = None
     _slice = None
 
-    # A string copy of the regex
-    re_pattern = ""
+    def __init__(self, re, sl):
+        """Init a Rule Object.
 
-    buff = ""
-
-    def __init__(self, rule):
-        if not self._checkPattern(rule):
-            raise ValueError('Malformed Rule')
-
-        self.re_pattern = self._patternFromRule(rule)
-
-        self._slice = self._sliceFromRule(rule)
-        self._regex = self._regexFromPattern(self.re_pattern)
-
-        if not self._regex:
-            raise ValueError('Malformed RegEX')
+        Arguments:
+            re -- a string Regular Expression
+            sl -- a string Slice
+        """
         self.rndvars = []
+        self._slice = self._slice_from_str(sl)
+        self._regex = self._regex_from_str(re)
 
-    def _patternFromRule(self, rule):
-        """ Get the RegEX inside a rule. """
-        rule = rule[1:-1].rsplit('][')
-        return rule[0]
 
-    def _sliceFromRule(self, rule):
-        """ Build a slice object from a Rule.
+    def search_rndvar(self, name):
+        """Search a specific Random Variable inside the list
+        of all the Random Variables created.
 
-            N.B: In according to slice class, if a slice
-            is build only with an args it is the 'stop' value.
+        Arguments:
+            name -- the name of the Random Variable to search
+        Return:
+            A reference to the Random Variable found, otherwise
+            None
         """
-
-        start = stop = step = None
-
-        # split Slice from Rule, obataining: x:x:x
-        slice_data = rule[1:-1].rsplit('][')
-        slice_data = slice_data[1]
-
-        # Make a list of int indexes
-        slice_data = slice_data.split(':')
-        slice_data = self._stringIndexToInt(slice_data)
-
-        # assign indexes to right var
-        ntoken = len(slice_data)
-        if ntoken == 1:
-            # When there is only an arg it describe a single
-            # index. Such as [1], [-1].
-            start = slice_data[0]
-            if start >= 0:
-                step = 1
-            else:
-                step = -1
-            stop = start + step
-        elif ntoken == 2:
-            # start and stop, [:]
-            start = slice_data[0]
-            stop = slice_data[1]
-        elif ntoken == 3:
-            start = slice_data[0]
-            stop = slice_data[1]
-            step = slice_data[2]
-
-            if step == 0: step = 1
-            if(step != None and step < 0):
-                raise ValueError("Malformed Slice: negative step doesn't supported")
-
-        elif ntoken > 2:
-            raise ValueError('Malformed Slice: too args')
-
-        return slice(start, stop, step)
-
-    def _checkPattern (self, rule):
-        """ Check if a Rule has the correct form as [][x:x:x] """
-        match = re.match('^\[.*\]\[[0-9:+-]*\]$', rule)
-
-        if match:
-            return True
-        return False
-
-    def _regexFromPattern(self, regex):
-        """ If the regex is compilable return an RegEX object.
-            Otherwise Null
-        """
-        regex_obj = None
-        try:
-            regex_obj = re.compile(regex)
-        except:
-            regex_obj = None
-
-        return regex_obj
-
-    def _stringIndexToInt(self, indexes):
-        """ Cast a list of string index to a list of int index.
-
-            N.B: If an index is equal to '' it is considered None.
-        """
-        for i in range(len(indexes)):
-            try:
-                if indexes[i] == '':
-                    indexes[i] = None
-                else:
-                    indexes[i] = int(indexes[i])
-            except:
-                raise ValueError('Malformed Slice: check value')
-        return indexes
-
-    def sliceUp(self, data):
-        """ Apply the Slice object inside the Rule """
-        data = data.__getitem__(self._slice)
-        return data
-
-    def reverseSliceUp(self, data):
-        """ Apply the complementary of the Slice inside the Rule """
-        # FUTURE NOTE: indices(int) apply the modulo operator
-        # to each index (excluse step) with the length of the data
-
-        # Get the right indices inside data.
-        length = len(data)
-        start, stop, step = self._slice.indices(length)
-
-        if(step < 0):
-            start, stop = stop + 1, start + 1
-
-        reverse = ''
-        for i in range(0, length, abs(step)):
-            if(i >= start and i < stop):
-                reverse += '.'
-            else:
-                reverse += data[i]
-        return reverse
-
-    def searchRnd(self, name):
         for rndvar in self.rndvars:
-            if(rndvar.name == name):
+            if rndvar.name == name:
                 return rndvar
         return None
 
     def put(self, data):
+        """Put data inside the buffer of the rule and compute it.
+
+        Arguments:
+            data -- An information to add to the current buffer of
+                    the rule
+        """
         self.buff += data
 
         matches = self._regex.finditer(self.buff, overlapped=True)
-
         match = None
         for match in matches:
-            rnd = self.reverseSliceUp(match.group(0))
-            det = self.sliceUp(match.group(0))
+            # Name of this Random Var & Determination
+            rnd = self._fill_slice(match.group(0))
+            det = self._apply_slice(match.group(0))
 
-            # search rnd in rndvars
-            rnd_ref = self.searchRnd(rnd)
+            rnd_ref = self.search_rndvar(rnd)
             if(rnd_ref == None):
-                # Create a new rndvar and add the
-                # determination
-                rnd = RandVar(rnd)
-                rnd.insertValue(det)
-
+                rnd = RandomVar(rnd)
                 self.rndvars.insert(0, rnd)
-            else:
-                rnd_ref.insertValue(det)
-
+                rnd_ref = self.rndvars[0]
+            rnd_ref.add(det)
+        # Remove the used data
         if match is not None:
-            self.buff = self.buff[match.end(0) - 1:]
+            start = match.end(0) - 1
+            self.buff = self.buff[start:]
+
+    def _slice_from_str(self, sl):
+        """Build a slice object from a string.
+
+        Arguments:
+            sl -- string rappresentation of a Slice
+                  i.e '1:2:1', '-1', '1:'
+        Returns:
+            A Slice object
+        """
+        if(sl == None or sl == ""):
+            raise ValueError("Malformed Slice")
+
+        start = stop = step = None
+
+        # Make a list of int indexes
+        sl = sl.split(':')
+        sl = self._slist_to_int(sl)
+
+        ntoken = len(sl)
+        if ntoken > 3:
+            raise ValueError("Malformed Slice: too args")
+        elif ntoken == 1:
+            # Only index. Such as [-1]
+            start = sl[0]
+            step = 1 if start >= 0 else -1
+            stop = start + step
+        elif ntoken == 2:
+            # Start and stop. Such as [1:2]
+            start = sl[0]
+            stop = sl[1]
+        elif ntoken == 3:
+            # Start, Stop and Step. Such as [1:2:1]
+            start = sl[0]
+            stop = sl[1]
+            step = sl[2] if sl[2] is not 0 else 1
+
+            if(step != None and step < 0):
+                raise ValueError("Malformed Slice: negative "
+                                 "step doesn't supported")
+
+        return slice(start, stop, step)
+
+    def _regex_from_str(self, re):
+        """Compile a regex and return a reference to it.
+
+        Arguments:
+            re -- the string regular expression
+        Return:
+            A reference to a regex compilated.
+            If the string is uncompilable raise an Exception
+        """
+        regex_obj = None
+        try:
+            regex_obj = regex.compile(re)
+        except regex.error:
+            raise ValueError("Malformed regex: Uncompilable")
+        return regex_obj
+
+    def _slist_to_int(self, str_list):
+        """Cast a list of string index to a list of int index.
+        Note that '' is consired None
+
+        Arguments:
+            str_list -- the string list to convert
+
+        Return:
+            a new list contains the casted index
+        """
+        int_list = []
+        for c in str_list:
+            try:
+                n = None if c is '' else int(c)
+                int_list.append(n)
+            except ValueError:
+                raise ValueError('Malformed Slice: check value')
+        return int_list
+
+    def _apply_slice(self, data):
+        """Apply the Slice object inside the Rule to a data.
+
+        Arguments:
+            data -- the data to be sliced
+        Returns:
+            the data sliced
+        """
+        return data.__getitem__(self._slice)
+
+    def _fill_slice(self, data, symbol='.'):
+        """Fill the portion of data inside the Slice obj with a
+        symbol.
+        i.e: Assuming the Slice 2:4, _fill_slice('hello') --> 'he..o'
+
+        Argumets:
+            data -- the data to be filled
+            symbol -- the symbol to use (Default '.')
+        Return:
+            The string filled
+        """
+        # FUTURE NOTE: indices(int) apply the mod to each index
+        # (but not step) with the arg passed
+        length = len(data)
+        start, stop, step = self._slice.indices(length)
+
+        if(step < 0):
+            # Negative step are useless in statistical purpose.
+            # So a negative step indicate an index rather than
+            # a slice, i.e [-1] --> slice(-1, -2, -1)
+            start, stop = stop + 1, start + 1
+
+        step = abs(step)
+        filled = ''
+        for i in range(0, length, step):
+            if(start <= i < stop):
+                filled += '.'
+            else:
+                filled += data[i]
+        return filled
