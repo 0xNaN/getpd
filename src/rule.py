@@ -80,8 +80,10 @@ class Rule:
         """
         res = ""
         for rnd in self.rndvars:
+            if(res != ""):
+                res += "\n"
             dmf = rnd.dmf(accurancy, verbosity)
-            res += rnd.name + ":\t" + str(dmf) + "\n"
+            res += rnd.name + ":\t" + str(dmf)
         return res
 
     def _slice_from_str(self, sl):
