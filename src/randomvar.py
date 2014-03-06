@@ -77,7 +77,7 @@ class RandomVar:
             p = self.weights[i]/self._tot_weight
             self._dmf[i] = round(p, accurancy)
 
-            elem = p
+            elem = self._dmf[i]
             if verbosity:
                 elem = str(self.samples[i]) + ":" + str(p)
             dmf.insert(i, elem)
