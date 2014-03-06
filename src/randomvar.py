@@ -38,7 +38,7 @@ class RandomVar:
             self.weights[i] += weight
         except ValueError:
             self.samples.insert(n_samples, value)
-            self.weights.insert(n_samples, 1)
+            self.weights.insert(n_samples, weight)
             self._dmf.insert(n_samples, None)
 
         self._tot_weight += weight
