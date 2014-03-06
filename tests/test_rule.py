@@ -224,6 +224,35 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(1/2, rndvars[5]._dmf[0]) #aa
         self.assertEqual(1/2, rndvars[5]._dmf[1]) #ab
 
+    def testResult(self):
+        r = Rule("..", "-1")
+        s = "aaabbccddeeff"
+        r.put(s)
+
+        r1 = "f.:\t['f:1.0']\n"\
+             "e.:\t['e:0.5', 'f:0.5']\n"\
+             "d.:\t['d:0.5', 'e:0.5']\n"\
+             "c.:\t['c:0.5', 'd:0.5']\n"\
+             "b.:\t['b:0.5', 'c:0.5']\n"\
+             "a.:\t['a:0.6666666666666666', 'b:0.3333333333333333']"
+        self.assertEqual(r1, r.result())
+
+        r2 = "f.:\t[1.0]\n"\
+             "e.:\t[0.5, 0.5]\n"\
+             "d.:\t[0.5, 0.5]\n"\
+             "c.:\t[0.5, 0.5]\n"\
+             "b.:\t[0.5, 0.5]\n"\
+             "a.:\t[0.6666666666666666, 0.3333333333333333]"
+        self.assertEqual(r2, r.result(verbosity=False))
+
+        r3 = "f.:\t[1.0]\n"\
+             "e.:\t[0.5, 0.5]\n"\
+             "d.:\t[0.5, 0.5]\n"\
+             "c.:\t[0.5, 0.5]\n"\
+             "b.:\t[0.5, 0.5]\n"\
+             "a.:\t[0.7, 0.3]"
+        self.assertEqual(r3, r.result(1, verbosity=False))
+
 def main():
 
     # Make the test suite & load all tests
